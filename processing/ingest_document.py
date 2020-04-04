@@ -14,6 +14,7 @@ class IngestDocument:
         self.document_content = ''
 
     def process_new_document(self, document_path, lda_model, lda_dictionary):
+        # TODO: Handle multiple type of text documents: .txt, .pdf, .docx, etc.
         document = open(document_path, "rb")
         self.document_content = str(document.read())
 
