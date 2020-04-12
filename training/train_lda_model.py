@@ -127,6 +127,7 @@ class LDATraining:
         lda_dictionary.filter_extremes(no_below=3)
         corpus = [lda_dictionary.doc2bow(token) for token in processed_tokens]
 
+        # TODO: Define the models parameters
         np.random.seed(123456)
         num_topics = 100
         lda_model = models.LdaModel(corpus, num_topics=num_topics,

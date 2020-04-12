@@ -2,6 +2,7 @@ import pickle as pickle_read_model
 import pandas as pd
 
 from nltk.tokenize import word_tokenize
+from processing import elastic_client
 
 
 class IngestDocument:
@@ -12,9 +13,18 @@ class IngestDocument:
     def __init__(self):
         self.version = "1.0.0"
         self.document_content = ''
+        self.credentials = elastic_client.ESConnectionData().connection_credentials
+        self.connection_client = elastic_client.ElasticClient(hosts=self.credentials['hosts'],
+                                                              user=self.credentials['user'],
+                                                              password=self.credentials['password'])
+        if not self.connection_client.elastic_connection.ping():
+            raise ValueError("Connection with the elastic database has failed.")
 
-    def process_new_document(self, document_path, lda_model, lda_dictionary):
-        # TODO: Handle multiple type of text documents: .txt, .pdf, .docx, etc.
+    def extract_lda_data(self, **kwargs):
+        lda_model = kwargs['lda_model']
+        document_path = kwargs['document_path']
+        lda_dictionary = kwargs['lda_dictionary']
+
         document = open(document_path, "rb")
         self.document_content = str(document.read())
 
@@ -25,16 +35,26 @@ class IngestDocument:
 
         tokens = word_tokenize(self.document_content)
         data_to_view = pd.DataFrame(lda_model[lda_dictionary.doc2bow(tokens)])
+        print(data_to_view)
 
-        # TODO: Define the results of the process in a JSON object
-        for topic in data_to_view[0]:
-            print(topic)
-        for accuracy in data_to_view[1]:
-            print(accuracy)
+        topics = []
+        accuracies = []
+        for data_type, info_array in data_to_view.iteritems():
+            for info_element in info_array:
+                if data_type == 0:
+                    topics.append(info_element)
+                else:
+                    accuracies.append(info_element)
+        topic_data = dict(zip(topics, accuracies))
+        book_data = {"title": "First book I have in the database",
+                     "topics": topic_data}
+
+        print(book_data)
+        self.connection_client.elastic_connection.index(index="smart_library", id="first_book", body=book_data)
 
 
 if __name__ == '__main__':
     ingest_document = IngestDocument()
-    ingest_document.process_new_document(document_path="D:\\Proiecte\\Smart-Library\\data\\document\\test_document.txt",
-                                         lda_model="D:\\Proiecte\\Smart-Library\\model\\lda.model",
-                                         lda_dictionary="D:\\Proiecte\\Smart-Library\\model\\lda_dict.dictionary")
+    ingest_document.extract_lda_data(document_path="D:\\Proiecte\\Smart-Library\\data\\document\\test_document.txt",
+                                     lda_model="D:\\Proiecte\\Smart-Library\\model\\lda.model",
+                                     lda_dictionary="D:\\Proiecte\\Smart-Library\\model\\lda_dict.dictionary")
