@@ -1,6 +1,17 @@
 # Smart-Library
-@ this is still a draft
 
-Smart Library is a tool using NLP technologies in order to compare and store documents.
+@author: Andrei Iancu
+credits: ElasticSearch documentation (ElasticSearch community and maintainers).
 
-It has a module used for training LDA models and other helper modules for ingestion of new documents, elastic search connectors etc. 
+This software platform uses ElasticSearch's powerfull search engines in order to process and compare text documents.
+
+There are two main methods of processing text data: LDA and TextEmbeddings.
+
+For the LDA (Latent Dirichlet Allocation), we are using a locally trained model on BBC news articles data.
+The text embeddings is using tensorflow pre-trained embeddings downloaded from the hub (Google API).
+
+The ElasticSearch index settings are present in cluster/ folder for each processing type.
+
+The pre-trained LDA models present in the models/ folder cannot be decoded with pickle in a different machine environment, so in case
+an error pops up, a new model has to be trained.
+
