@@ -1,0 +1,25 @@
+PUT smart_library_tf
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0
+  },
+   "mappings": {
+    "dynamic": "true",
+    "_source": {
+      "enabled": "true"
+    },
+    "properties": {
+      "document_title": {
+        "type": "text"
+      },
+      "document_content": {
+        "type": "text"
+      },
+      "document_vector": {
+        "type": "dense_vector",
+        "dims": 512
+      }
+    }
+  }
+}

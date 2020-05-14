@@ -127,7 +127,6 @@ class LDATraining:
         lda_dictionary.filter_extremes(no_below=3)
         corpus = [lda_dictionary.doc2bow(token) for token in processed_tokens]
 
-        # TODO: Define the models parameters
         np.random.seed(123456)
         num_topics = 100
         lda_model = models.LdaModel(corpus, num_topics=num_topics,
@@ -138,7 +137,6 @@ class LDATraining:
         store_dictionary = open("D:\\Proiecte\\Smart-Library\\model\\lda_dict.dictionary", "wb")
         pickle_save_model.dump(lda_model, store_model)
         pickle_save_model.dump(lda_dictionary, store_dictionary)
-        # TODO: Implement a way to re-train the model with new data, or at lease gather more data.
 
 
 if __name__ == '__main__':

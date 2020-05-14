@@ -25,11 +25,9 @@ class ElasticClient:
 @singleton
 class ESConnectionData:
     def __init__(self):
-        # getting read errors with this url
-        # TODO: Fix the connection with the UPT elastic server.
-        # self.connection_credentials = {"hosts": ["http://elastic.cm.upt.ro:9200/"],
-        #                                "user": "andrei",
-        #                                "password": "not_defined"}
+        # self.connection_credentials = {"hosts": ["https://elastic.cm.upt.ro:9200/"],
+        #                                "user": "admin",
+        #                                "password": "admin"}
 
         # development
         self.connection_credentials = {"hosts": ["http://localhost:9200/"],
