@@ -30,6 +30,6 @@ class ESConnectionData:
         #                                "password": "admin"}
 
         # development
-        self.connection_credentials = {"hosts": ["http://localhost:9200/"],
+        self.connection_credentials = {"hosts": ["http://192.168.1.9:9200/"],
                                        "user": "andrei",
                                        "password": "not_defined"}
