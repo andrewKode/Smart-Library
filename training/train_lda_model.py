@@ -2,7 +2,6 @@ import pickle as pickle_save_model
 import pandas as pd
 import numpy as np
 
-from tqdm import tqdm
 from langdetect import detect
 from itertools import chain
 from nltk import pos_tag
@@ -24,8 +23,6 @@ class LDATraining:
     documents which will be later ingested into a elastic search database.
     """
     def __init__(self):
-        # init pandas()
-        tqdm.pandas()
         self.training_data_available = False
         self.store_data = DataStorage()
         self.lda_model_utils = LDAModel()
@@ -51,27 +48,27 @@ class LDATraining:
 
     def process_training_sentences(self):
         processed_training_data = self.store_data.training_raw_data
-        processed_training_data = processed_training_data.progress_map(sent_tokenize)
+        processed_training_data = processed_training_data.map(sent_tokenize)
         self.store_data.training_sentences_data = processed_training_data
         print("\n...finished processing sentences")
-        # print(self.store_data.training_sentences_data)
+        print(self.store_data.training_sentences_data)
 
     def process_training_words(self):
         processed_training_data = self.store_data.training_sentences_data
-        processed_training_data = processed_training_data.progress_map(lambda sentences: [word_tokenize(sentence)
-                                                                                          for sentence in sentences])
+        processed_training_data = processed_training_data.map(lambda sentences: [word_tokenize(sentence)
+                                                                                 for sentence in sentences])
         self.store_data.training_words_data = processed_training_data
         print("\n...finished processing words")
-        # print(self.store_data.training_words_data)
+        print(self.store_data.training_words_data)
 
     def process_pos_tag(self):
         processed_training_data = self.store_data.training_words_data
-        processed_training_data = processed_training_data.progress_map(lambda tokens_sentences: [pos_tag(tokens)
-                                                                                                 for tokens
-                                                                                                 in tokens_sentences])
+        processed_training_data = processed_training_data.map(lambda tokens_sentences: [pos_tag(tokens)
+                                                                                        for tokens
+                                                                                        in tokens_sentences])
         self.store_data.training_pos_tag_data = processed_training_data
         print("\n...finished processing pos tag")
-        # print(self.store_data.training_pos_tag_data)
+        print(self.store_data.training_pos_tag_data)
 
     def process_words_lem(self):
 
@@ -90,7 +87,7 @@ class LDATraining:
 
         processed_training_data = self.store_data.training_pos_tag_data
         word_net_lem = WordNetLemmatizer()
-        processed_training_data = processed_training_data.progress_map(
+        processed_training_data = processed_training_data.map(
             lambda list_tokens_pos: [
                 [
                     word_net_lem.lemmatize(el[0], get_word_pos_role(el[1]))
@@ -101,10 +98,10 @@ class LDATraining:
         )
         self.store_data.training_lem_data = processed_training_data
         print("\n...finished processing lem words")
-        # print(self.store_data.training_lem_data)
+        print(self.store_data.training_lem_data)
 
     def remove_stopwords(self):
-        removable_stopwords = stopwords.words('English') + self.lda_model_utils.helper_stopwords_other + \
+        removable_stopwords = stopwords.words('english') + self.lda_model_utils.helper_stopwords_other + \
                               self.lda_model_utils.helper_stopwords_verbs
 
         processed_training_data = self.store_data.training_lem_data.map(lambda sentences:
@@ -115,7 +112,7 @@ class LDATraining:
                                                                               and len(token) > 1])
         self.store_data.lem_tokens = processed_training_data
         print("\n...finished removing the stopwords")
-        # print(self.store_data.lem_tokens)
+        print(self.store_data.lem_tokens)
 
     def run_training(self):
         processed_tokens = self.store_data.lem_tokens.tolist()
@@ -133,15 +130,15 @@ class LDATraining:
                                     id2word=lda_dictionary,
                                     passes=4, alpha=[0.01] * num_topics,
                                     eta=[0.01] * len(lda_dictionary.keys()))
-        store_model = open("D:\\Proiecte\\Smart-Library\\model\\lda.model", "wb")
-        store_dictionary = open("D:\\Proiecte\\Smart-Library\\model\\lda_dict.dictionary", "wb")
+        store_model = open("/home/andrei/Proiecte/Smart-Library/lda.model", "wb")
+        store_dictionary = open("/home/andrei/Proiecte/Smart-Library/lda_dict.dictionary", "wb")
         pickle_save_model.dump(lda_model, store_model)
         pickle_save_model.dump(lda_dictionary, store_dictionary)
 
 
 if __name__ == '__main__':
     lda_training = LDATraining()
-    lda_training.read_training_data(training_data="D:\\Proiecte\\Smart-Library\\data\\bbc\\BBC_news_dataset.csv",
+    lda_training.read_training_data(training_data="/home/andrei/Proiecte/Smart-Library/data/bbc/BBC_news_dataset.csv",
                                     column_name="description")
 
     lda_training.process_training_sentences()
