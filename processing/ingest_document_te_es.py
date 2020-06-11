@@ -15,6 +15,8 @@ class IngestDocumentTextEmbeddings:
         self.google_api = "https://tfhub.dev/google/universal-sentence-encoder/2"
         self.embeddings = None
         self.session = None
+        self.docs_count = 0
+        self.docs_limit = 0
         self.text_phrase = ''
         self.credentials = ESConnectionData().connection_credentials
         self.connection_client = ElasticClient(hosts=self.credentials['hosts'],
@@ -52,6 +54,7 @@ class IngestDocumentTextEmbeddings:
         return [vector.tolist() for vector in vectors][0]
 
     def index_definition(self, data, title):
+        self.docs_count += 1
         document_title = title
         document_content = data
         document_vector = self.embed_input_text([document_content])
@@ -62,7 +65,8 @@ class IngestDocumentTextEmbeddings:
 
         self.connection_client.elastic_connection.index(index="smart_library_tf", id=document_id, body=body_data)
 
-    def ingest_from_csv_corpus(self, csv_path, content_column_name, title_column_name, csv_reader):
+    def ingest_from_csv_corpus(self, docs_limit, csv_path, content_column_name, title_column_name, csv_reader):
+        self.docs_limit = docs_limit
         if csv_reader == "pandas":
             # THIS IS WITH PANDAS
             csv_data = pd.read_csv(csv_path)
@@ -75,7 +79,6 @@ class IngestDocumentTextEmbeddings:
                     self.index_definition(data, csv_data_title)
             except TypeError:
                 pass
-            print("Done indexing.")
         elif csv_reader == "python-csv":
             # THIS IS WITH CSV READER
             csv_fille = open(csv_path, encoding='utf8')
@@ -86,9 +89,11 @@ class IngestDocumentTextEmbeddings:
                 csv_data_content = row['content']
                 try:
                     self.index_definition(csv_data_content, csv_data_title)
+                    if self.docs_limit == self.docs_count:
+                        print(f"Done indexing {self.docs_count} documents.")
+                        break
                 except TypeError:
                     pass
-            print("Done indexing.")
         else:
             print("Incorrect csv reading method mentioned, pls chose betwen \"pandas\" or \"python-csv\".")
 
@@ -108,5 +113,6 @@ if __name__ == '__main__':
     ingest_doc_tf.ingest_from_csv_corpus(csv_path="D:\\Proiecte\\CorpusAndDataset\\articles1.csv",
                                          content_column_name="content",
                                          title_column_name="title",
-                                         csv_reader="python-csv")
+                                         csv_reader="python-csv",
+                                         docs_limit=5000)
     ingest_doc_tf.stop_tensorflow_session()

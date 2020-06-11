@@ -1,12 +1,11 @@
 import uuid
-import tqdm
 import csv
 
 import pickle as pickle_read_model
 import pandas as pd
 
 from nltk.tokenize import word_tokenize
-from processing import elastic_client
+import elastic_client
 
 
 class IngestDocumentLDA:
@@ -17,6 +16,8 @@ class IngestDocumentLDA:
     def __init__(self):
         self.version = "1.0.0"
         self.document_content = ''
+        self.docs_count = 0
+        self.docs_limit = 0
         self.credentials = elastic_client.ESConnectionData().connection_credentials
         self.connection_client = elastic_client.ElasticClient(hosts=self.credentials['hosts'],
                                                               user=self.credentials['user'],
@@ -52,6 +53,7 @@ class IngestDocumentLDA:
         return topic_data
 
     def index_data(self, **kwargs):
+        self.docs_count += 1
         lda_model = kwargs['lda_model']
         lda_dictionary = kwargs['lda_dictionary']
         raw_data = kwargs['raw_data']
@@ -63,7 +65,6 @@ class IngestDocumentLDA:
                      "topics_accuracies": topics,
                      "topics": list(topics.keys())}
         document_id = uuid.uuid1().hex
-        print(body_data)
         self.connection_client.elastic_connection.index(index="smart_library_lda", id=document_id, body=body_data)
 
     def ingest_lda_data_from_csv(self, **kwargs):
@@ -73,6 +74,7 @@ class IngestDocumentLDA:
         title_column_name = kwargs["title_column"]
         lda_model = kwargs['lda_model']
         lda_dictionary = kwargs['lda_dictionary']
+        self.docs_limit = kwargs['docs_limit']
 
         if csv_reader == "pandas":
             # THIS IS WITH PANDAS
@@ -85,9 +87,11 @@ class IngestDocumentLDA:
                 for data in csv_data_content:
                     self.index_data(lda_model=lda_model, lda_dictionary=lda_dictionary,
                                     raw_data=data, raw_data_title=csv_data_title)
+                    if self.docs_limit == self.docs_count:
+                        print(f"Done indexing {self.docs_count} documents.")
+                        break
             except TypeError:
                 pass
-            print("Done indexing.")
         elif csv_reader == "python-csv":
             # THIS IS WITH CSV READER
             csv_fille = open(csv_path, encoding='utf8')
@@ -99,9 +103,11 @@ class IngestDocumentLDA:
                 try:
                     self.index_data(lda_model=lda_model, lda_dictionary=lda_dictionary,
                                     raw_data=csv_data_content, raw_data_title=csv_data_title)
+                    if self.docs_limit == self.docs_count:
+                        print(f"Done indexing {self.docs_count} documents.")
+                        break
                 except TypeError:
                     pass
-            print("Done indexing.")
         else:
             print("Incorrect csv reading method mentioned, pls chose betwen \"pandas\" or \"python-csv\".")
 
@@ -147,4 +153,5 @@ if __name__ == '__main__':
                                              lda_model="/home/andrei/Proiecte/Smart-Library/model/lda.model",
                                              lda_dictionary="/home/andrei/Proiecte/Smart-Library/model/lda_dict.dictionary",
                                              title_column="title",
-                                             content_column="content")
+                                             content_column="content",
+                                             docs_limit=5000)
