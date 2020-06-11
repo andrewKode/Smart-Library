@@ -7,7 +7,6 @@ import pandas as pd
 
 from nltk.tokenize import word_tokenize
 from processing import elastic_client
-from tqdm import tqdm
 
 
 class IngestDocumentLDA:
@@ -24,8 +23,6 @@ class IngestDocumentLDA:
                                                               password=self.credentials['password'])
         if not self.connection_client.elastic_connection.ping():
             raise ValueError("Connection with the elastic database has failed.")
-
-        tqdm.pandas()
 
     def process_data_lda(self, **kwargs) -> dict:
         lda_model = kwargs['lda_model']
@@ -85,7 +82,7 @@ class IngestDocumentLDA:
             csv_data_title = csv_data[title_column_name]
             try:
                 print("Indexing documents from csv file.")
-                for data in tqdm(csv_data_content):
+                for data in csv_data_content:
                     self.index_data(lda_model=lda_model, lda_dictionary=lda_dictionary,
                                     raw_data=data, raw_data_title=csv_data_title)
             except TypeError:
@@ -96,7 +93,7 @@ class IngestDocumentLDA:
             csv_fille = open(csv_path, encoding='utf8')
             reader = csv.DictReader(csv_fille, delimiter=',', quoting=csv.QUOTE_MINIMAL)
             print("Indexing documents from csv file.")
-            for row in tqdm(reader):
+            for row in reader:
                 csv_data_title = row['title']
                 csv_data_content = row['content']
                 try:
@@ -143,10 +140,11 @@ class IngestDocumentLDA:
 
 
 if __name__ == '__main__':
+    print("Indexing document(s)...")
     ingest_document = IngestDocumentLDA()
-    ingest_document.ingest_lda_data_from_csv(csv_path="D:\\Proiecte\\CorpusAndDataset\\articles1.csv",
+    ingest_document.ingest_lda_data_from_csv(csv_path="/home/andrei/Proiecte/Smart-Library/data/articles1.csv",
                                              csv_reader="python-csv",
-                                             lda_model="D:\\Proiecte\\Smart-Library\\model\\lda.model",
-                                             lda_dictionary="D:\\Proiecte\\Smart-Library\\model\\lda_dict.dictionary",
+                                             lda_model="/home/andrei/Proiecte/Smart-Library/model/lda.model",
+                                             lda_dictionary="/home/andrei/Proiecte/Smart-Library/model/lda_dict.dictionary",
                                              title_column="title",
                                              content_column="content")

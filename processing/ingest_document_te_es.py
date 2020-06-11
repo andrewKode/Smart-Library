@@ -6,7 +6,6 @@ import tensorflow.compat.v1 as tf
 import tensorflow_hub as tf_hub
 import pandas as pd
 
-from tqdm import tqdm
 from elastic_client import ElasticClient, ESConnectionData
 
 
@@ -24,7 +23,6 @@ class IngestDocumentTextEmbeddings:
         if not self.connection_client.elastic_connection.ping():
             raise ValueError("Connection with the elastic database has failed.")
         self.initialize_tensorflow_session()
-        tqdm.pandas()
 
     def initialize_tensorflow_session(self):
         # disable CPU instructions support warnings
@@ -73,7 +71,7 @@ class IngestDocumentTextEmbeddings:
             csv_data_title = csv_data[title_column_name]
             try:
                 print("Indexing documents from csv file.")
-                for data in tqdm(csv_data_content):
+                for data in csv_data_content:
                     self.index_definition(data, csv_data_title)
             except TypeError:
                 pass
@@ -83,7 +81,7 @@ class IngestDocumentTextEmbeddings:
             csv_fille = open(csv_path, encoding='utf8')
             reader = csv.DictReader(csv_fille, delimiter=',', quoting=csv.QUOTE_MINIMAL)
             print("Indexing documents from csv file.")
-            for row in tqdm(reader):
+            for row in reader:
                 csv_data_title = row['title']
                 csv_data_content = row['content']
                 try:
@@ -103,6 +101,7 @@ class IngestDocumentTextEmbeddings:
 
 
 if __name__ == '__main__':
+    print("Indexing document(s)...")
     ingest_doc_tf = IngestDocumentTextEmbeddings()
     # ingest_doc_tf.index_document(document_path="D:\\Proiecte\\Smart-Library\\data\\document\\ingest_document.txt",
     #                              title="Some random title.")

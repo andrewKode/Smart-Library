@@ -83,5 +83,5 @@ class QueryLDADocument:
 
 if __name__ == '__main__':
     query_lda = QueryLDADocument()
-    query_lda.query_input(lda_model="D:\\Proiecte\\Smart-Library\\model\\lda.model",
-                          lda_dictionary="D:\\Proiecte\\Smart-Library\\model\\lda_dict.dictionary")
+    query_lda.query_input(lda_model="/home/andrei/Proiecte/Smart-Library/model/lda.model",
+                          lda_dictionary="/home/andrei/Proiecte/Smart-Library/model/lda_dict.dictionary")

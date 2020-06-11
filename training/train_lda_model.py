@@ -130,8 +130,8 @@ class LDATraining:
                                     id2word=lda_dictionary,
                                     passes=4, alpha=[0.01] * num_topics,
                                     eta=[0.01] * len(lda_dictionary.keys()))
-        store_model = open("/home/andrei/Proiecte/Smart-Library/lda.model", "wb")
-        store_dictionary = open("/home/andrei/Proiecte/Smart-Library/lda_dict.dictionary", "wb")
+        store_model = open("/home/andrei/Proiecte/Smart-Library/model/lda.model", "wb")
+        store_dictionary = open("/home/andrei/Proiecte/Smart-Library/model/lda_dict.dictionary", "wb")
         pickle_save_model.dump(lda_model, store_model)
         pickle_save_model.dump(lda_dictionary, store_dictionary)
 
